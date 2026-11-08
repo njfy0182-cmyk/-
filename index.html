@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تست اتصال به Google Sheet</title>
+  <style>
+    body { font-family: Tahoma, sans-serif; padding: 20px; background: #111; color: #eee; }
+    .ok { color: #4ade80; } .err { color: #f87171; }
+    table { border-collapse: collapse; margin-top: 15px; }
+    td, th { border: 1px solid #555; padding: 6px 10px; }
+  </style>
+</head>
+<body>
+  <h2>تست اتصال به Google Sheet</h2>
+  <p id="status">در حال اتصال...</p>
+  <div id="out"></div>
+
+  <script>
+    const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRScXvr-EwDmrIOzbpVb3zFrk3u-Hv9M4M8G1dm00Goi9Vpmv3_9Exlksif5NALQPfBhK9-T2YBu5Fh/pub?gid=0&single=true&output=csv";
+
+    fetch(URL_CSV + "&t=" + Date.now())
+      .then(r => {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      })
+      .then(text => {
+        const rows = text.trim().split(/\r?\n/).map(l => l.split(","));
+        document.getElementById("status").innerHTML =
+          '<span class="ok">✔ اتصال موفق بود. تعداد ردیف‌ها (بدون سرستون): ' + (rows.length - 1) + '</span>';
+        document.getElementById("out").innerHTML =
+          "<table>" + rows.map((r, i) =>
+            "<tr>" + r.map(c => (i === 0 ? "<th>" : "<td>") + c + (i === 0 ? "</th>" : "</td>")).join("") + "</tr>"
+          ).join("") + "</table>";
+      })
+      .catch(err => {
+        document.getElementById("status").innerHTML =
+          '<span class="err">✘ خطا: ' + err.message + '</span>';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
